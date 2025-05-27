@@ -28,6 +28,7 @@ interface UserResponse {
     id: number;
     username: string;
     email: string;
+    role: "client" | "admin";
 }
 
 export async function createUserService(request: CreateUserRequest): Promise<AuthUserResponse> {
@@ -56,18 +57,19 @@ export async function createUserService(request: CreateUserRequest): Promise<Aut
     const user = await User.create({
         username: request.username,
         email: request.email,
-        password: await BcryptHelper.hashPassword(request.password)
-
+        password: await BcryptHelper.hashPassword(request.password),
+        role: "client"
     });
 
     const token = await JsonWebTokenHelper.generateToken({
         id: user.id,
         username: user.dataValues.username,
-        email: user.dataValues.email
+        email: user.dataValues.email,
+        role: user.dataValues.role
     });
 
     return {
-        id: user.dataValues.id,
+        id: user.id,
         username: request.username,
         email: request.email,
         token: token
@@ -95,7 +97,8 @@ export async function authUserService(request: AuthUserRequest): Promise<AuthUse
     const token = await JsonWebTokenHelper.generateToken({
         id: user.dataValues.id,
         username: user.dataValues.username,
-        email: user.dataValues.email
+        email: user.dataValues.email,
+        role: user.dataValues.role
     });
 
     return {
@@ -108,11 +111,11 @@ export async function authUserService(request: AuthUserRequest): Promise<AuthUse
 
 export async function getProfileService(token: string): Promise<UserResponse> {
     const payload = await JsonWebTokenHelper.verifyToken(token);
-    console.log(payload);
     return {
         id: payload.id,
         username: payload.username,
-        email: payload.email
+        email: payload.email,
+        role: payload.role as "client" | "admin"
     };
 }
 

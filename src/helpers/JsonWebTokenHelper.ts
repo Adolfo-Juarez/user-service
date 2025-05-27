@@ -6,6 +6,7 @@ interface UserTokenPayload {
     id: number;
     username: string;
     email: string;
+    role: string;
 }
 
 export default class JsonWebTokenHelper {

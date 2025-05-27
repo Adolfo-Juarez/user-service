@@ -1,3 +1,4 @@
+import BcryptHelper from "../helpers/BcryptHelper.ts";
 import User from "../user/models/User.ts";
 
 export async function addDefaultAdminUser() {
@@ -8,13 +9,16 @@ export async function addDefaultAdminUser() {
     })
 
     if (count > 0) {
+        console.log("Default admin user already exists");
         return;
     }
 
-    await User.create({
+    User.create({
         username: "admin",
         email: "admin@mail.com",
-        password: "12345678",
+        password: await BcryptHelper.hashPassword("12345678"),
         role: "admin"
+    }).then(() => {
+        console.log("Default admin user added");
     });
 }
