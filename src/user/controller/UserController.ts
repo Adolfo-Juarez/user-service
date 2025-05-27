@@ -2,6 +2,8 @@ import ValidationException from "../../exception/ValidationException.ts";
 import { createUserService, authUserService, getProfileService, sendRecoveryPasswordService } from "../services/UserService.ts";
 
 import ModelNotFound from "../../exception/ModelNotFound.ts";
+import pkg from 'jsonwebtoken';
+const { JsonWebTokenError } = pkg;
 
 // Función interna que maneja la lógica
 export async function createUserController(request: any, response: any) {
@@ -83,6 +85,11 @@ export async function getProfileController(request: any, response: any) {
         }
         if (e instanceof ModelNotFound) {
             response.status(404).json({
+                message: e.message
+            });
+        }
+        if (e instanceof JsonWebTokenError) {
+            response.status(401).json({
                 message: e.message
             });
         }
