@@ -12,9 +12,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.9",
-    "@types/nodemailer": "^6.4.17",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -23,5 +20,10 @@
     "mysql2": "^3.14.1",
     "nodemailer": "^7.0.3",
     "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/nodemailer": "^6.4.17"
   }
 }
