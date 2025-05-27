@@ -7,6 +7,7 @@ interface UserAttributes {
   username: string;
   email: string;
   password: string;
+  role: "client" | "admin";
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -20,7 +21,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public username!: string;
   public email!: string;
   public password!: string;
-  
+  public role!: "client" | "admin";
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -44,6 +45,11 @@ User.init({
   password: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  role: {
+    type: DataTypes.ENUM('client', 'admin'),
+    allowNull: false,
+    defaultValue: 'client'
   }
 }, {
   sequelize,

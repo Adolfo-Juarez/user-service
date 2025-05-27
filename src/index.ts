@@ -9,7 +9,11 @@ dotenv.config();
 const app = express();
 
 app.use(express.json({ limit: '100kb' }));
+
 app.use("/user", router);
+app.get("/", (req, res) => {
+    res.send("Hello World from User Service");
+});
 
 sequelize.sync({ alter: true })
     .then(() => {
