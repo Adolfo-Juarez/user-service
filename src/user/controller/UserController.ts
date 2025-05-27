@@ -1,38 +1,68 @@
-import express from "express";
 import ValidationException from "../../exception/ValidationException.ts";
-import createUserService from "../services/UserService.ts";
+import { createUserService, authUserService } from "../services/UserService.ts";
 
-// Definimos una función adaptadora para manejar la solicitud y respuesta de Express
-export function createUser(req, res) {
-    handleCreateUser({ request: req, response: res });
-}
+import ModelNotFound from "../../exception/ModelNotFound.ts";
 
 // Función interna que maneja la lógica
-async function handleCreateUser(params: { request: any; response: any }) {
+export async function createUserController(request: any, response: any) {
     try {
-        const { username, email, password } = params.request.body;
-        
+        const { username, email, password } = request.body;
+
         const user = await createUserService({
             username,
             email,
             password
         });
-        
-        params.response.status(201).json({
+
+        response.status(201).json({
             message: "Usuario creado exitosamente",
             user
         });
-    } catch(e: unknown) {
+    } catch (e: unknown) {
         if (e instanceof ValidationException) {
-            params.response.status(400).json({
+            response.status(400).json({
                 message: e.message
             });
         } else {
             // Manejar otros tipos de errores
             console.error(e);
-            params.response.status(500).json({
+            response.status(500).json({
                 message: 'Error interno del servidor'
             });
         }
+    }
+}
+
+export async function authUserController(request: any, response: any) {
+    try {
+        const { email, password } = request.body;
+
+        const user = await authUserService({
+            email,
+            password
+        });
+
+        response.status(200).json({
+            message: "Usuario autenticado exitosamente",
+            user
+        });
+    } catch (e: unknown) {
+        if (e instanceof ValidationException) {
+            response.status(400).json({
+                message: e.message
+            });
+        }
+
+        if (e instanceof ModelNotFound) {
+            response.status(404).json({
+                message: e.message
+            });
+        }
+
+        console.error(e);
+        response.status(500).json({
+            message: 'Error interno del servidor'
+        });
+
     }
 }

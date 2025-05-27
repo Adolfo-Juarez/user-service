@@ -1,3 +1,4 @@
+import ModelNotFound from "../../exception/ModelNotFound.ts";
 import ValidationException from "../../exception/ValidationException.ts";
 import BcryptHelper from "../../helpers/BcryptHelper.ts";
 import JsonWebTokenHelper from "../../helpers/JsonWebTokenHelper.ts";
@@ -9,14 +10,19 @@ interface CreateUserRequest {
     password: string;
 }
 
-interface CreateUserResponse {
+interface AuthUserResponse {
     id: number;
     username: string;
     email: string;
     token: string;
 }
 
-export default async function createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
+interface AuthUserRequest{
+    email: string;
+    password: string;
+}
+
+export async function createUserService(request: CreateUserRequest): Promise<AuthUserResponse> {
     if (request.username.length < 3) {
         throw new ValidationException("Username must be at least 3 characters long");
     }
@@ -56,6 +62,40 @@ export default async function createUser(request: CreateUserRequest): Promise<Cr
         id: user.id,
         username: request.username,
         email: request.email,
+        token: token
+    };
+}
+
+
+export async function authUserService(request: AuthUserRequest): Promise<AuthUserResponse> {
+    const user = await User.findOne({
+        where: {
+            email: request.email
+        },
+        attributes: ['id', 'username', 'email', 'password'] // Incluir explícitamente el campo password
+    });
+    
+    if (!user) {
+        throw new ModelNotFound("User not found");
+    }
+    console.log(user); // undefined
+
+    const isPasswordValid = await BcryptHelper.comparePassword(request.password, user.dataValues.password);
+    
+    if (!isPasswordValid) {
+        throw new ValidationException("Invalid password");
+    }
+    
+    const token = await JsonWebTokenHelper.generateToken({
+        id: user.id,
+        username: user.username,
+        email: user.email
+    });
+    
+    return {
+        id: user.dataValues.id,
+        username: user.dataValues.username,
+        email: user.dataValues.email,
         token: token
     };
 }
