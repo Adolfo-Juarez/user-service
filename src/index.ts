@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 sequelize.sync({ alter: true })
     .then(() => {
         addDefaultAdminUser();
-        app.listen(3000, () => {
+        app.listen(3030, () => {
             console.log('Server is running on port 3000');
         });
     })

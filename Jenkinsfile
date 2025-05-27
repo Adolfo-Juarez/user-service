@@ -73,7 +73,7 @@ ssh -i "$SSH_KEY_FILE" -o StrictHostKeyChecking=no "$EC2_USER"@"${params.EC2_HOS
     fi
 
     # Iniciar nuevo contenedor
-    sudo docker run -d --name user-service -p 80:80 user-service
+    sudo docker run -d --name user-service -p 3030:3030 user-service
 
     sudo docker ps --filter "name=user-service"
 EOF
