@@ -17,9 +17,15 @@ interface AuthUserResponse {
     token: string;
 }
 
-interface AuthUserRequest{
+interface AuthUserRequest {
     email: string;
     password: string;
+}
+
+interface UserResponse {
+    id: number;
+    username: string;
+    email: string;
 }
 
 export async function createUserService(request: CreateUserRequest): Promise<AuthUserResponse> {
@@ -54,12 +60,12 @@ export async function createUserService(request: CreateUserRequest): Promise<Aut
 
     const token = await JsonWebTokenHelper.generateToken({
         id: user.id,
-        username: user.username,
-        email: user.email
+        username: user.dataValues.username,
+        email: user.dataValues.email
     });
 
     return {
-        id: user.id,
+        id: user.dataValues.id,
         username: request.username,
         email: request.email,
         token: token
@@ -71,31 +77,39 @@ export async function authUserService(request: AuthUserRequest): Promise<AuthUse
     const user = await User.findOne({
         where: {
             email: request.email
-        },
-        attributes: ['id', 'username', 'email', 'password'] // Incluir explícitamente el campo password
+        }
     });
-    
+
     if (!user) {
         throw new ModelNotFound("User not found");
     }
-    console.log(user); // undefined
 
     const isPasswordValid = await BcryptHelper.comparePassword(request.password, user.dataValues.password);
-    
+
     if (!isPasswordValid) {
         throw new ValidationException("Invalid password");
     }
-    
+
     const token = await JsonWebTokenHelper.generateToken({
-        id: user.id,
-        username: user.username,
-        email: user.email
+        id: user.dataValues.id,
+        username: user.dataValues.username,
+        email: user.dataValues.email
     });
-    
+
     return {
         id: user.dataValues.id,
         username: user.dataValues.username,
         email: user.dataValues.email,
         token: token
+    };
+}
+
+export async function getProfileService(token: string): Promise<UserResponse> {
+    const payload = await JsonWebTokenHelper.verifyToken(token);
+    console.log(payload);
+    return {
+        id: payload.id,
+        username: payload.username,
+        email: payload.email
     };
 }

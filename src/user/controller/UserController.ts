@@ -1,5 +1,5 @@
 import ValidationException from "../../exception/ValidationException.ts";
-import { createUserService, authUserService } from "../services/UserService.ts";
+import { createUserService, authUserService, getProfileService } from "../services/UserService.ts";
 
 import ModelNotFound from "../../exception/ModelNotFound.ts";
 
@@ -64,5 +64,31 @@ export async function authUserController(request: any, response: any) {
             message: 'Error interno del servidor'
         });
 
+    }
+}
+
+export async function getProfileController(request: any, response: any) {
+    try {
+        const token = request.headers.authorization.split(" ")[1];
+        const user = await getProfileService(token);
+        response.status(200).json({
+            message: "Perfil obtenido exitosamente",
+            user
+        });
+    } catch (e: unknown) {
+        if (e instanceof ValidationException) {
+            response.status(400).json({
+                message: e.message
+            });
+        }
+        if (e instanceof ModelNotFound) {
+            response.status(404).json({
+                message: e.message
+            });
+        }
+        console.error(e);
+        response.status(500).json({
+            message: 'Error interno del servidor'
+        });
     }
 }
