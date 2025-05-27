@@ -2,6 +2,8 @@ import ModelNotFound from "../../exception/ModelNotFound.ts";
 import ValidationException from "../../exception/ValidationException.ts";
 import BcryptHelper from "../../helpers/BcryptHelper.ts";
 import JsonWebTokenHelper from "../../helpers/JsonWebTokenHelper.ts";
+import MailHelper from "../../helpers/MailHelper.ts";
+import PasswordGenerator from "../../helpers/PasswordGenerator.ts";
 import User from "../models/User.ts";
 
 interface CreateUserRequest {
@@ -112,4 +114,29 @@ export async function getProfileService(token: string): Promise<UserResponse> {
         username: payload.username,
         email: payload.email
     };
+}
+
+export async function sendRecoveryPasswordService(mail: string): Promise<void> {
+
+    const user = await User.findOne({
+        where: {
+            email: mail
+        }
+    });
+
+    if (!user) {
+        throw new ModelNotFound("User not found");
+    }
+
+    const password = PasswordGenerator.generatePassword();
+
+    await user.update({
+        password: await BcryptHelper.hashPassword(password)
+    });
+
+    MailHelper.sendRecoveryPasswordMail({
+        receiverEmail: user.dataValues.email,
+        receiverUsername: user.dataValues.username,
+        password: password
+    });
 }
