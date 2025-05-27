@@ -1,5 +1,5 @@
 # Dockerfile para Auth Service
-FROM node:18-alpine
+FROM node:23-alpine
 
 # Definir ARGs para variables de entorno
 ARG JWT_SECRET="super-secret-key"
